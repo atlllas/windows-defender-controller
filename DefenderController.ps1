@@ -20,9 +20,10 @@ Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
 [xml]$xaml = @'
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Defender Controller" Height="480" Width="560"
-        WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize">
-    <Grid Margin="14">
+        Title="Defender Controller" Height="360" Width="420"
+        WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize"
+        FontFamily="Segoe UI" Background="#F4F4F4">
+    <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -30,23 +31,21 @@ Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Orientation="Vertical" Margin="0,0,0,10">
-            <TextBlock Text="Windows Defender Controller" FontSize="20" FontWeight="Bold"/>
-            <TextBlock x:Name="StatusText" Text="Durum kontrol ediliyor..." Margin="0,6,0,0" FontSize="13"/>
-            <TextBlock x:Name="TamperText" Text="" Margin="0,2,0,0" FontSize="12" Foreground="DarkOrange"/>
+        <StackPanel Grid.Row="0" Orientation="Vertical" HorizontalAlignment="Center" Margin="0,0,0,18">
+            <TextBlock x:Name="StatusIcon" Text="" FontSize="34" HorizontalAlignment="Center"/>
+            <TextBlock x:Name="StatusText" Text="Durum kontrol ediliyor..." Margin="0,6,0,0" FontSize="15" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+            <TextBlock x:Name="TamperText" Text="" Margin="0,4,0,0" FontSize="11" Foreground="#888888" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10">
-            <Button x:Name="DisableBtn" Content="Defender'ı Kapat" Width="200" Height="42" Margin="0,0,10,0" Background="#C0392B" Foreground="White" FontWeight="Bold"/>
-            <Button x:Name="EnableBtn" Content="Defender'ı Aç" Width="200" Height="42" Background="#27AE60" Foreground="White" FontWeight="Bold"/>
+        <StackPanel Grid.Row="1" Orientation="Vertical" Margin="0,0,0,12">
+            <Button x:Name="DisableBtn" Content="Defender'ı Kapat" Height="46" Margin="0,0,0,10" Background="#C0392B" Foreground="White" FontWeight="Bold" FontSize="14" BorderThickness="0"/>
+            <Button x:Name="EnableBtn" Content="Defender'ı Aç" Height="46" Background="#27AE60" Foreground="White" FontWeight="Bold" FontSize="14" BorderThickness="0"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,10">
-            <Button x:Name="RefreshBtn" Content="Durumu Yenile" Width="150" Height="28"/>
-        </StackPanel>
-
-        <TextBox x:Name="LogBox" Grid.Row="3" IsReadOnly="True" VerticalScrollBarVisibility="Auto"
-                 FontFamily="Consolas" FontSize="12" TextWrapping="Wrap" Background="#1E1E1E" Foreground="#DCDCDC"/>
+        <Expander Grid.Row="3" Header="Detaylı log" FontSize="11" Foreground="#666666">
+            <TextBox x:Name="LogBox" IsReadOnly="True" Height="120" VerticalScrollBarVisibility="Auto"
+                     FontFamily="Consolas" FontSize="11" TextWrapping="Wrap" Background="#1E1E1E" Foreground="#DCDCDC" Margin="0,6,0,0"/>
+        </Expander>
     </Grid>
 </Window>
 '@
@@ -54,11 +53,11 @@ Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
 $reader = New-Object System.Xml.XmlNodeReader $xaml
 $window = [Windows.Markup.XamlReader]::Load($reader)
 
+$StatusIcon = $window.FindName("StatusIcon")
 $StatusText = $window.FindName("StatusText")
 $TamperText = $window.FindName("TamperText")
 $DisableBtn = $window.FindName("DisableBtn")
 $EnableBtn  = $window.FindName("EnableBtn")
-$RefreshBtn = $window.FindName("RefreshBtn")
 $LogBox     = $window.FindName("LogBox")
 
 function Write-Log {
@@ -82,24 +81,27 @@ function Update-Status {
     try {
         $mp = Get-MpComputerStatus -ErrorAction Stop
         if ($mp.RealTimeProtectionEnabled) {
-            $StatusText.Text = "Durum: Gerçek zamanlı koruma AÇIK"
+            $StatusIcon.Text = "🛡️"
+            $StatusText.Text = "Koruma AÇIK"
             $StatusText.Foreground = "DarkGreen"
         } else {
-            $StatusText.Text = "Durum: Gerçek zamanlı koruma KAPALI"
+            $StatusIcon.Text = "⚠️"
+            $StatusText.Text = "Koruma KAPALI"
             $StatusText.Foreground = "DarkRed"
         }
     } catch {
-        $StatusText.Text = "Durum okunamadı (Get-MpComputerStatus başarısız)"
+        $StatusIcon.Text = "❔"
+        $StatusText.Text = "Durum okunamadı"
         $StatusText.Foreground = "Gray"
     }
 
     $tamper = Get-TamperProtectionState
     if ($tamper -eq $true) {
-        $TamperText.Text = "Tamper Protection: AÇIK -> Bazı değişiklikler Windows tarafından geri alınabilir. Kapatmak için: Windows Security > Virüs ve tehdit koruması > Ayarları yönet > Kurcalamaya Karşı Koruma."
+        $TamperText.Text = "Tamper Protection açık - bazı değişiklikler geri alınabilir"
     } elseif ($tamper -eq $false) {
-        $TamperText.Text = "Tamper Protection: KAPALI -> tüm ayarlar kalıcı olarak değiştirilebilir."
+        $TamperText.Text = ""
     } else {
-        $TamperText.Text = "Tamper Protection durumu okunamadı."
+        $TamperText.Text = "Tamper Protection durumu okunamadı"
     }
 }
 
@@ -214,7 +216,6 @@ function Enable-Defender {
 
 $DisableBtn.Add_Click({ Disable-Defender })
 $EnableBtn.Add_Click({ Enable-Defender })
-$RefreshBtn.Add_Click({ Update-Status; Write-Log "Durum yenilendi." })
 
 Update-Status
 Write-Log "Araç başlatıldı. Tamper Protection açıksa bazı adımlar başarısız görünecektir - bu beklenen bir davranıştır."
