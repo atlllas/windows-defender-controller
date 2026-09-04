@@ -161,16 +161,19 @@ function Disable-Defender {
     }
 
     # Security Center, WinDefend servisi çalıştığı sürece Defender'ı "aktif sağlayıcı"
-    # olarak görmeye devam eder ve normal aç/kapa arayüzünü gösterir. "Kuruluşunuz
-    # tarafından yönetilir / aktif antivirüs sağlayıcısı yok" ekranı için servisin de
-    # devre dışı bırakılması gerekiyor.
-    Set-DefenderPreferenceSafe "WinDefend servisi durduruluyor" { Stop-Service -Name WinDefend -Force -ErrorAction Stop }
-    Set-DefenderPreferenceSafe "WinDefend servisi devre dışı bırakılıyor" { Set-Service -Name WinDefend -StartupType Disabled -ErrorAction Stop }
-    Set-DefenderPreferenceSafe "WdNisSvc (Ağ İnceleme) servisi durduruluyor" { Stop-Service -Name WdNisSvc -Force -ErrorAction Stop }
-    Set-DefenderPreferenceSafe "WdNisSvc servisi devre dışı bırakılıyor" { Set-Service -Name WdNisSvc -StartupType Disabled -ErrorAction Stop }
+    # olarak görmeye devam eder. Servis "Protected Process Light" olduğu için çalışırken
+    # Stop-Service/Set-Service ile durdurulamaz (Erişim Engellendi) - bu Tamper Protection'dan
+    # bağımsız, ayrı bir OS korumasıdır ve kasıtlı olarak aşılamaz. Bunun yerine registry'deki
+    # başlangıç tipini doğrudan değiştirip bir sonraki açılışta başlamamasını sağlıyoruz.
+    Set-DefenderPreferenceSafe "WinDefend başlangıç tipi devre dışı yapılıyor (etkisi yeniden başlatmada)" {
+        Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\WinDefend" -Name "Start" -Value 4 -Type DWord -ErrorAction Stop
+    }
+    Set-DefenderPreferenceSafe "WdNisSvc başlangıç tipi devre dışı yapılıyor (etkisi yeniden başlatmada)" {
+        Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\WdNisSvc" -Name "Start" -Value 4 -Type DWord -ErrorAction Stop
+    }
 
     Write-Log "Kapatma işlemi tamamlandı. Yukarıdaki HATA satırları Tamper Protection'ın engellediği adımlardır."
-    Write-Log "Not: Windows Security ekranının 'kuruluşunuz tarafından yönetilir' haline geçmesi bazen anında olmaz - Windows Security uygulamasını kapatıp tekrar açmayı veya bilgisayarı yeniden başlatmayı deneyin." "WARN"
+    Write-Log "Servis değişikliği ancak yeniden başlatma sonrası etkili olur. Bilgisayarı yeniden başlatın, ardından Windows Security'nin 'kuruluşunuz tarafından yönetilir' haline geçtiğini kontrol edin." "WARN"
     Update-Status
 }
 
@@ -196,9 +199,13 @@ function Enable-Defender {
         }
     }
 
-    Set-DefenderPreferenceSafe "WinDefend servisi yeniden etkinleştiriliyor" { Set-Service -Name WinDefend -StartupType Manual -ErrorAction Stop }
+    Set-DefenderPreferenceSafe "WinDefend başlangıç tipi normale (Manual) alınıyor" {
+        Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\WinDefend" -Name "Start" -Value 3 -Type DWord -ErrorAction Stop
+    }
+    Set-DefenderPreferenceSafe "WdNisSvc başlangıç tipi normale (Manual) alınıyor" {
+        Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\WdNisSvc" -Name "Start" -Value 3 -Type DWord -ErrorAction Stop
+    }
     Set-DefenderPreferenceSafe "WinDefend servisi başlatılıyor" { Start-Service -Name WinDefend -ErrorAction Stop }
-    Set-DefenderPreferenceSafe "WdNisSvc servisi yeniden etkinleştiriliyor" { Set-Service -Name WdNisSvc -StartupType Manual -ErrorAction Stop }
     Set-DefenderPreferenceSafe "WdNisSvc servisi başlatılıyor" { Start-Service -Name WdNisSvc -ErrorAction Stop }
 
     Write-Log "Açma işlemi tamamlandı. Değişikliklerin tam yansıması için bilgisayarı yeniden başlatmanız gerekebilir."
