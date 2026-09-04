@@ -160,7 +160,17 @@ function Disable-Defender {
         New-ItemProperty -Path $path -Name "DisableAntiSpyware" -PropertyType DWord -Value 1 -Force -ErrorAction Stop | Out-Null
     }
 
+    # Security Center, WinDefend servisi çalıştığı sürece Defender'ı "aktif sağlayıcı"
+    # olarak görmeye devam eder ve normal aç/kapa arayüzünü gösterir. "Kuruluşunuz
+    # tarafından yönetilir / aktif antivirüs sağlayıcısı yok" ekranı için servisin de
+    # devre dışı bırakılması gerekiyor.
+    Set-DefenderPreferenceSafe "WinDefend servisi durduruluyor" { Stop-Service -Name WinDefend -Force -ErrorAction Stop }
+    Set-DefenderPreferenceSafe "WinDefend servisi devre dışı bırakılıyor" { Set-Service -Name WinDefend -StartupType Disabled -ErrorAction Stop }
+    Set-DefenderPreferenceSafe "WdNisSvc (Ağ İnceleme) servisi durduruluyor" { Stop-Service -Name WdNisSvc -Force -ErrorAction Stop }
+    Set-DefenderPreferenceSafe "WdNisSvc servisi devre dışı bırakılıyor" { Set-Service -Name WdNisSvc -StartupType Disabled -ErrorAction Stop }
+
     Write-Log "Kapatma işlemi tamamlandı. Yukarıdaki HATA satırları Tamper Protection'ın engellediği adımlardır."
+    Write-Log "Not: Windows Security ekranının 'kuruluşunuz tarafından yönetilir' haline geçmesi bazen anında olmaz - Windows Security uygulamasını kapatıp tekrar açmayı veya bilgisayarı yeniden başlatmayı deneyin." "WARN"
     Update-Status
 }
 
@@ -186,7 +196,12 @@ function Enable-Defender {
         }
     }
 
-    Write-Log "Açma işlemi tamamlandı."
+    Set-DefenderPreferenceSafe "WinDefend servisi yeniden etkinleştiriliyor" { Set-Service -Name WinDefend -StartupType Manual -ErrorAction Stop }
+    Set-DefenderPreferenceSafe "WinDefend servisi başlatılıyor" { Start-Service -Name WinDefend -ErrorAction Stop }
+    Set-DefenderPreferenceSafe "WdNisSvc servisi yeniden etkinleştiriliyor" { Set-Service -Name WdNisSvc -StartupType Manual -ErrorAction Stop }
+    Set-DefenderPreferenceSafe "WdNisSvc servisi başlatılıyor" { Start-Service -Name WdNisSvc -ErrorAction Stop }
+
+    Write-Log "Açma işlemi tamamlandı. Değişikliklerin tam yansıması için bilgisayarı yeniden başlatmanız gerekebilir."
     Update-Status
 }
 
