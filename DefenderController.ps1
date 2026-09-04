@@ -1,0 +1,200 @@
+﻿#Requires -Version 5.1
+<#
+    DefenderController - kişisel makinenizde Windows Defender ayarlarını
+    açıp kapatmak için basit bir WPF arayüz.
+
+    Tamper Protection açıkken bazı adımlar Windows tarafından geri alınır;
+    bu normaldir ve bilinçli bir Microsoft güvenlik tasarımıdır. Log
+    panelinde her adımın gerçekten uygulanıp uygulanmadığı gösterilir.
+#>
+
+# ---- Admin olarak yeniden başlat ----
+$currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
+if (-not $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Start-Process powershell.exe -Verb RunAs -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
+    exit
+}
+
+Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
+
+[xml]$xaml = @'
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Defender Controller" Height="480" Width="560"
+        WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize">
+    <Grid Margin="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Vertical" Margin="0,0,0,10">
+            <TextBlock Text="Windows Defender Controller" FontSize="20" FontWeight="Bold"/>
+            <TextBlock x:Name="StatusText" Text="Durum kontrol ediliyor..." Margin="0,6,0,0" FontSize="13"/>
+            <TextBlock x:Name="TamperText" Text="" Margin="0,2,0,0" FontSize="12" Foreground="DarkOrange"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10">
+            <Button x:Name="DisableBtn" Content="Defender'ı Kapat" Width="200" Height="42" Margin="0,0,10,0" Background="#C0392B" Foreground="White" FontWeight="Bold"/>
+            <Button x:Name="EnableBtn" Content="Defender'ı Aç" Width="200" Height="42" Background="#27AE60" Foreground="White" FontWeight="Bold"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,10">
+            <Button x:Name="RefreshBtn" Content="Durumu Yenile" Width="150" Height="28"/>
+        </StackPanel>
+
+        <TextBox x:Name="LogBox" Grid.Row="3" IsReadOnly="True" VerticalScrollBarVisibility="Auto"
+                 FontFamily="Consolas" FontSize="12" TextWrapping="Wrap" Background="#1E1E1E" Foreground="#DCDCDC"/>
+    </Grid>
+</Window>
+'@
+
+$reader = New-Object System.Xml.XmlNodeReader $xaml
+$window = [Windows.Markup.XamlReader]::Load($reader)
+
+$StatusText = $window.FindName("StatusText")
+$TamperText = $window.FindName("TamperText")
+$DisableBtn = $window.FindName("DisableBtn")
+$EnableBtn  = $window.FindName("EnableBtn")
+$RefreshBtn = $window.FindName("RefreshBtn")
+$LogBox     = $window.FindName("LogBox")
+
+function Write-Log {
+    param([string]$Message, [string]$Level = "INFO")
+    $ts = Get-Date -Format "HH:mm:ss"
+    $LogBox.AppendText("[$ts] [$Level] $Message`r`n")
+    $LogBox.ScrollToEnd()
+}
+
+function Get-TamperProtectionState {
+    try {
+        $val = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\Microsoft\Windows Defender\Features" -Name "TamperProtection" -ErrorAction Stop
+        # 5 = açık, 4 veya 0 = kapalı (sürüme göre değişebilir, bu yüzden kesin değil)
+        return ($val -eq 5)
+    } catch {
+        return $null # okunamadı, muhtemelen erişim kısıtlı
+    }
+}
+
+function Update-Status {
+    try {
+        $mp = Get-MpComputerStatus -ErrorAction Stop
+        if ($mp.RealTimeProtectionEnabled) {
+            $StatusText.Text = "Durum: Gerçek zamanlı koruma AÇIK"
+            $StatusText.Foreground = "DarkGreen"
+        } else {
+            $StatusText.Text = "Durum: Gerçek zamanlı koruma KAPALI"
+            $StatusText.Foreground = "DarkRed"
+        }
+    } catch {
+        $StatusText.Text = "Durum okunamadı (Get-MpComputerStatus başarısız)"
+        $StatusText.Foreground = "Gray"
+    }
+
+    $tamper = Get-TamperProtectionState
+    if ($tamper -eq $true) {
+        $TamperText.Text = "Tamper Protection: AÇIK -> Bazı değişiklikler Windows tarafından geri alınabilir. Kapatmak için: Windows Security > Virüs ve tehdit koruması > Ayarları yönet > Kurcalamaya Karşı Koruma."
+    } elseif ($tamper -eq $false) {
+        $TamperText.Text = "Tamper Protection: KAPALI -> tüm ayarlar kalıcı olarak değiştirilebilir."
+    } else {
+        $TamperText.Text = "Tamper Protection durumu okunamadı."
+    }
+}
+
+function Set-DefenderPreferenceSafe {
+    param([string]$Description, [scriptblock]$Action)
+    try {
+        & $Action
+        Write-Log "OK  - $Description"
+    } catch {
+        Write-Log "HATA - $Description : $($_.Exception.Message)" "WARN"
+    }
+}
+
+function Show-TamperWarning {
+    $tamper = Get-TamperProtectionState
+    if ($tamper -ne $true) { return }
+
+    $result = [System.Windows.MessageBox]::Show(
+        "Kurcalamaya Karşı Koruma (Tamper Protection) AÇIK.`n`n" +
+        "Bu açıkken Defender ayarları script ile kalıcı olarak değiştirilemez - Windows onları otomatik geri alır. " +
+        "Bu, Microsoft'un bilinçli bir güvenlik tasarımıdır ve script ile kapatılamaz, sadece elle kapatılabilir.`n`n" +
+        "Adımlar:`n" +
+        "1. Windows Security > Virüs ve tehdit koruması > Ayarları yönet`n" +
+        "2. 'Kurcalamaya Karşı Koruma' anahtarını kapatın`n`n" +
+        "Şimdi bu ekranı açmamı ister misiniz?",
+        "Tamper Protection Açık",
+        [System.Windows.MessageBoxButton]::YesNo,
+        [System.Windows.MessageBoxImage]::Warning
+    )
+
+    if ($result -eq [System.Windows.MessageBoxResult]::Yes) {
+        Start-Process "windowsdefender://threatsettings"
+        Write-Log "Windows Security ayar ekranı açıldı. Tamper Protection'ı kapattıktan sonra 'Defender'ı Kapat' butonuna tekrar basın." "WARN"
+    } else {
+        Write-Log "Tamper Protection açık kaldı - aşağıdaki adımlardan bazıları başarısız olacaktır." "WARN"
+    }
+}
+
+function Disable-Defender {
+    Write-Log "Defender kapatma işlemi başlıyor..."
+    Show-TamperWarning
+
+    Set-DefenderPreferenceSafe "Gerçek zamanlı koruma kapatılıyor" { Set-MpPreference -DisableRealtimeMonitoring $true -ErrorAction Stop }
+    Set-DefenderPreferenceSafe "Davranış izleme kapatılıyor" { Set-MpPreference -DisableBehaviorMonitoring $true -ErrorAction Stop }
+    Set-DefenderPreferenceSafe "IOAV (indirilen dosya) koruması kapatılıyor" { Set-MpPreference -DisableIOAVProtection $true -ErrorAction Stop }
+    Set-DefenderPreferenceSafe "Script taraması kapatılıyor" { Set-MpPreference -DisableScriptScanning $true -ErrorAction Stop }
+    Set-DefenderPreferenceSafe "Bulut tabanlı koruma kapatılıyor" { Set-MpPreference -MAPSReporting 0 -ErrorAction Stop }
+    Set-DefenderPreferenceSafe "Örnek gönderimi kapatılıyor" { Set-MpPreference -SubmitSamplesConsent 2 -ErrorAction Stop }
+
+    Set-DefenderPreferenceSafe "Zamanlanmış tarama görevi devre dışı bırakılıyor" {
+        Get-ScheduledTask -TaskPath "\Microsoft\Windows\Windows Defender\" -ErrorAction Stop |
+            Disable-ScheduledTask -ErrorAction Stop | Out-Null
+    }
+
+    Set-DefenderPreferenceSafe "Policy registry anahtarı (DisableAntiSpyware) ayarlanıyor" {
+        $path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender"
+        if (-not (Test-Path $path)) { New-Item -Path $path -Force | Out-Null }
+        New-ItemProperty -Path $path -Name "DisableAntiSpyware" -PropertyType DWord -Value 1 -Force -ErrorAction Stop | Out-Null
+    }
+
+    Write-Log "Kapatma işlemi tamamlandı. Yukarıdaki HATA satırları Tamper Protection'ın engellediği adımlardır."
+    Update-Status
+}
+
+function Enable-Defender {
+    Write-Log "Defender açma işlemi başlıyor..."
+
+    Set-DefenderPreferenceSafe "Gerçek zamanlı koruma açılıyor" { Set-MpPreference -DisableRealtimeMonitoring $false -ErrorAction Stop }
+    Set-DefenderPreferenceSafe "Davranış izleme açılıyor" { Set-MpPreference -DisableBehaviorMonitoring $false -ErrorAction Stop }
+    Set-DefenderPreferenceSafe "IOAV (indirilen dosya) koruması açılıyor" { Set-MpPreference -DisableIOAVProtection $false -ErrorAction Stop }
+    Set-DefenderPreferenceSafe "Script taraması açılıyor" { Set-MpPreference -DisableScriptScanning $false -ErrorAction Stop }
+    Set-DefenderPreferenceSafe "Bulut tabanlı koruma açılıyor" { Set-MpPreference -MAPSReporting 2 -ErrorAction Stop }
+    Set-DefenderPreferenceSafe "Örnek gönderimi varsayılana alınıyor" { Set-MpPreference -SubmitSamplesConsent 1 -ErrorAction Stop }
+
+    Set-DefenderPreferenceSafe "Zamanlanmış tarama görevi yeniden etkinleştiriliyor" {
+        Get-ScheduledTask -TaskPath "\Microsoft\Windows\Windows Defender\" -ErrorAction Stop |
+            Enable-ScheduledTask -ErrorAction Stop | Out-Null
+    }
+
+    Set-DefenderPreferenceSafe "Policy registry anahtarı (DisableAntiSpyware) kaldırılıyor" {
+        $path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender"
+        if (Test-Path $path) {
+            Remove-ItemProperty -Path $path -Name "DisableAntiSpyware" -ErrorAction SilentlyContinue
+        }
+    }
+
+    Write-Log "Açma işlemi tamamlandı."
+    Update-Status
+}
+
+$DisableBtn.Add_Click({ Disable-Defender })
+$EnableBtn.Add_Click({ Enable-Defender })
+$RefreshBtn.Add_Click({ Update-Status; Write-Log "Durum yenilendi." })
+
+Update-Status
+Write-Log "Araç başlatıldı. Tamper Protection açıksa bazı adımlar başarısız görünecektir - bu beklenen bir davranıştır."
+
+$window.ShowDialog() | Out-Null
