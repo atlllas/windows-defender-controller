@@ -9,6 +9,11 @@ A small WPF GUI to turn Windows Defender on or off with administrator rights, bu
 
 ### [![Download](https://img.shields.io/badge/⬇️_DOWNLOAD-DefenderController.exe-2E86DE?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/atlllas/windows-defender-controller/releases/latest/download/DefenderController.exe)
 
+<p float="left">
+  <img src="assets/screenshot-off.png" width="49%" alt="Windows Defender is Off" />
+  <img src="assets/screenshot-on.png" width="49%" alt="Windows Defender is On" />
+</p>
+
 ## Features
 
 - One-click disable/enable of Windows Defender (real-time protection, cloud protection, script scanning, scheduled scans, and the underlying service)
