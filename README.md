@@ -2,9 +2,12 @@
 
 A small WPF GUI to turn Windows Defender on or off with administrator rights, built as a personal utility (inspired by [Defender Control](https://www.sordum.org/9480/defender-control-v2-1/)).
 
-![status](https://img.shields.io/badge/platform-Windows%2010%2F11-blue)
+![platform](https://img.shields.io/badge/platform-Windows%2010%2F11-blue?style=for-the-badge)
+![license](https://img.shields.io/github/license/atlllas/windows-defender-controller?style=for-the-badge)
+![release](https://img.shields.io/github/v/release/atlllas/windows-defender-controller?style=for-the-badge&color=2E86DE)
+![downloads](https://img.shields.io/github/downloads/atlllas/windows-defender-controller/total?style=for-the-badge&color=27AE60)
 
-### [⬇️ Download DefenderController.exe](https://github.com/atlllas/windows-defender-controller/releases/latest/download/DefenderController.exe)
+### [![Download](https://img.shields.io/badge/⬇️_DOWNLOAD-DefenderController.exe-2E86DE?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/atlllas/windows-defender-controller/releases/latest/download/DefenderController.exe)
 
 ## Features
 
