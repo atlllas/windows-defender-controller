@@ -102,6 +102,7 @@ function Get-TamperProtectionState {
 }
 
 function Update-Status {
+    $resolved = $false
     try {
         $mp = Get-MpComputerStatus -ErrorAction Stop
         if ($mp.RealTimeProtectionEnabled) {
@@ -115,7 +116,24 @@ function Update-Status {
             $BadgeBorder.Background = "#C0392B"
             $BadgeText.Text = "X"
         }
+        $resolved = $true
     } catch {
+        # WMI sağlayıcısı (MsMpEng) cevap vermiyor olabilir - WinDefend servisi
+        # devre dışıysa bu normaldir, servis durumuna bakarak yine de anlamlı bir
+        # durum gösterebiliriz.
+        try {
+            $svc = Get-Service -Name WinDefend -ErrorAction Stop
+            if ($svc.Status -ne 'Running') {
+                $BannerBorder.Background = "#C0392B"
+                $BannerText.Text = "Windows Defender Kapalı"
+                $BadgeBorder.Background = "#C0392B"
+                $BadgeText.Text = "X"
+                $resolved = $true
+            }
+        } catch { }
+    }
+
+    if (-not $resolved) {
         $BannerBorder.Background = "#7F8C8D"
         $BannerText.Text = "Durum okunamadı"
         $BadgeBorder.Background = "#7F8C8D"
