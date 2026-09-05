@@ -35,12 +35,15 @@ Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
             </Grid.ColumnDefinitions>
 
             <Grid Grid.Column="0" Width="76" Height="76" VerticalAlignment="Top">
-                <TextBlock Text="&#128421;" FontSize="52" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                <Border x:Name="BadgeBorder" Width="30" Height="30" CornerRadius="15" Background="#C0392B"
-                        HorizontalAlignment="Right" VerticalAlignment="Bottom" BorderBrush="White" BorderThickness="2">
-                    <TextBlock x:Name="BadgeText" Text="X" FontSize="15" FontWeight="Bold" Foreground="White"
-                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </Border>
+                <Path x:Name="ShieldPath" Data="M12 1 L21 5 V11 C21 16.5 17.5 21.2 12 23 C6.5 21.2 3 16.5 3 11 V5 Z"
+                      Fill="#C0392B" Stretch="Uniform" Width="70" Height="70"
+                      HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Path.Effect>
+                        <DropShadowEffect Color="Black" BlurRadius="8" ShadowDepth="1" Opacity="0.25"/>
+                    </Path.Effect>
+                </Path>
+                <TextBlock x:Name="ShieldGlyph" Text="✕" FontSize="26" FontWeight="Bold" Foreground="White"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,4,0,0"/>
             </Grid>
 
             <StackPanel Grid.Column="1" Margin="14,0,0,0">
@@ -74,8 +77,8 @@ $window = [Windows.Markup.XamlReader]::Load($reader)
 
 $BannerBorder    = $window.FindName("BannerBorder")
 $BannerText      = $window.FindName("BannerText")
-$BadgeBorder     = $window.FindName("BadgeBorder")
-$BadgeText       = $window.FindName("BadgeText")
+$ShieldPath      = $window.FindName("ShieldPath")
+$ShieldGlyph     = $window.FindName("ShieldGlyph")
 $TamperText      = $window.FindName("TamperText")
 $DisableBtn      = $window.FindName("DisableBtn")
 $EnableBtn       = $window.FindName("EnableBtn")
@@ -108,13 +111,13 @@ function Update-Status {
         if ($mp.RealTimeProtectionEnabled) {
             $BannerBorder.Background = "#27AE60"
             $BannerText.Text = "Windows Defender Açık"
-            $BadgeBorder.Background = "#27AE60"
-            $BadgeText.Text = "OK"
+            $ShieldPath.Fill = "#27AE60"
+            $ShieldGlyph.Text = "✓"
         } else {
             $BannerBorder.Background = "#C0392B"
             $BannerText.Text = "Windows Defender Kapalı"
-            $BadgeBorder.Background = "#C0392B"
-            $BadgeText.Text = "X"
+            $ShieldPath.Fill = "#C0392B"
+            $ShieldGlyph.Text = "✕"
         }
         $resolved = $true
     } catch {
@@ -126,8 +129,8 @@ function Update-Status {
             if ($svc.Status -ne 'Running') {
                 $BannerBorder.Background = "#C0392B"
                 $BannerText.Text = "Windows Defender Kapalı"
-                $BadgeBorder.Background = "#C0392B"
-                $BadgeText.Text = "X"
+                $ShieldPath.Fill = "#C0392B"
+                $ShieldGlyph.Text = "✕"
                 $resolved = $true
             }
         } catch { }
@@ -136,8 +139,8 @@ function Update-Status {
     if (-not $resolved) {
         $BannerBorder.Background = "#7F8C8D"
         $BannerText.Text = "Durum okunamadı"
-        $BadgeBorder.Background = "#7F8C8D"
-        $BadgeText.Text = "?"
+        $ShieldPath.Fill = "#7F8C8D"
+        $ShieldGlyph.Text = "?"
     }
 
     $tamper = Get-TamperProtectionState
