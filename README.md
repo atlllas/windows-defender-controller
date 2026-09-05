@@ -4,6 +4,8 @@ A small WPF GUI to turn Windows Defender on or off with administrator rights, bu
 
 ![status](https://img.shields.io/badge/platform-Windows%2010%2F11-blue)
 
+### [⬇️ Download DefenderController.exe](https://github.com/atlllas/windows-defender-controller/releases/latest/download/DefenderController.exe)
+
 ## Features
 
 - One-click disable/enable of Windows Defender (real-time protection, cloud protection, script scanning, scheduled scans, and the underlying service)
@@ -13,7 +15,7 @@ A small WPF GUI to turn Windows Defender on or off with administrator rights, bu
 
 ## Usage
 
-1. Download `DefenderController.ps1` (or build the `.exe` yourself — see below).
+1. [Download the .exe](https://github.com/atlllas/windows-defender-controller/releases/latest/download/DefenderController.exe) (or grab `DefenderController.ps1` and build it yourself — see below).
 2. Run it. It will ask for administrator rights.
 3. Click **Disable/Enable Windows Defender**. If Tamper Protection is on, follow the prompt to turn it off in Windows Security first — this is a Windows limitation, not a bug.
 4. Some changes (the underlying service start type) only take full effect after a reboot.
