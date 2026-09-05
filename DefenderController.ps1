@@ -24,13 +24,13 @@ Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
         WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize"
         FontFamily="Segoe UI" Background="#F4F4F4">
     <StackPanel>
-        <Border x:Name="BannerBorder" Background="#C0392B" Padding="18,16,8,16">
+        <Border x:Name="BannerBorder" Background="#C0392B" Padding="18,16,14,16">
             <Grid>
                 <TextBlock x:Name="BannerText" Text="Durum kontrol ediliyor..." Foreground="White" FontSize="17" FontWeight="Bold"
-                           VerticalAlignment="Center" Margin="0,0,34,0"/>
-                <Button x:Name="MenuBtn" Content="&#8942;" FontSize="20" FontWeight="Bold" Foreground="White"
-                        Background="Transparent" BorderThickness="0" Width="34" Height="34" Padding="0"
-                        HorizontalAlignment="Right" VerticalAlignment="Center" Cursor="Hand"/>
+                           VerticalAlignment="Center" Margin="0,0,70,0"/>
+                <Button x:Name="MenuBtn" Content="Menü ▾" FontSize="12" Foreground="White"
+                        Background="#33FFFFFF" BorderBrush="#66FFFFFF" BorderThickness="1"
+                        Padding="10,5" HorizontalAlignment="Right" VerticalAlignment="Center" Cursor="Hand"/>
             </Grid>
         </Border>
 
