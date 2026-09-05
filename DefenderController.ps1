@@ -20,45 +20,69 @@ Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
 [xml]$xaml = @'
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Defender Controller" Height="360" Width="420"
+        Title="Defender Controller" Width="440" SizeToContent="Height"
         WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize"
         FontFamily="Segoe UI" Background="#F4F4F4">
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <StackPanel>
+        <Border x:Name="BannerBorder" Background="#C0392B" Padding="18,16">
+            <TextBlock x:Name="BannerText" Text="Durum kontrol ediliyor..." Foreground="White" FontSize="17" FontWeight="Bold"/>
+        </Border>
 
-        <StackPanel Grid.Row="0" Orientation="Vertical" HorizontalAlignment="Center" Margin="0,0,0,18">
-            <TextBlock x:Name="StatusIcon" Text="" FontSize="34" HorizontalAlignment="Center"/>
-            <TextBlock x:Name="StatusText" Text="Durum kontrol ediliyor..." Margin="0,6,0,0" FontSize="15" FontWeight="SemiBold" HorizontalAlignment="Center"/>
-            <TextBlock x:Name="TamperText" Text="" Margin="0,4,0,0" FontSize="11" Foreground="#888888" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
-        </StackPanel>
+        <Grid Margin="18,16,18,4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="86"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Row="1" Orientation="Vertical" Margin="0,0,0,12">
-            <Button x:Name="DisableBtn" Content="Defender'ı Kapat" Height="46" Margin="0,0,0,10" Background="#C0392B" Foreground="White" FontWeight="Bold" FontSize="14" BorderThickness="0"/>
-            <Button x:Name="EnableBtn" Content="Defender'ı Aç" Height="46" Background="#27AE60" Foreground="White" FontWeight="Bold" FontSize="14" BorderThickness="0"/>
-        </StackPanel>
+            <Grid Grid.Column="0" Width="76" Height="76" VerticalAlignment="Top">
+                <TextBlock Text="&#128421;" FontSize="52" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <Border x:Name="BadgeBorder" Width="30" Height="30" CornerRadius="15" Background="#C0392B"
+                        HorizontalAlignment="Right" VerticalAlignment="Bottom" BorderBrush="White" BorderThickness="2">
+                    <TextBlock x:Name="BadgeText" Text="X" FontSize="15" FontWeight="Bold" Foreground="White"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+            </Grid>
 
-        <Expander Grid.Row="3" Header="Detaylı log" FontSize="11" Foreground="#666666">
-            <TextBox x:Name="LogBox" IsReadOnly="True" Height="120" VerticalScrollBarVisibility="Auto"
-                     FontFamily="Consolas" FontSize="11" TextWrapping="Wrap" Background="#1E1E1E" Foreground="#DCDCDC" Margin="0,6,0,0"/>
-        </Expander>
-    </Grid>
+            <StackPanel Grid.Column="1" Margin="14,0,0,0">
+                <Button x:Name="DisableBtn" Content="Windows Defender'ı Devre Dışı Bırak" Height="34" Margin="0,0,0,8"
+                        Background="White" BorderBrush="#CCCCCC" BorderThickness="1"/>
+                <Button x:Name="EnableBtn" Content="Windows Defender'ı Etkinleştir" Height="34" Margin="0,0,0,8"
+                        Background="White" BorderBrush="#CCCCCC" BorderThickness="1"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="OpenSecurityBtn" Grid.Column="0" Content="Güvenlik Merkezini Aç" Height="30" FontSize="11" Margin="0,0,4,0"/>
+                    <Button x:Name="LogToggleBtn" Grid.Column="1" Content="Log Göster" Height="30" FontSize="11" Margin="4,0,0,0"/>
+                </Grid>
+            </StackPanel>
+        </Grid>
+
+        <TextBlock x:Name="TamperText" Text="" FontSize="11" Foreground="#B36B00" Margin="18,0,18,12" TextWrapping="Wrap"/>
+
+        <Border x:Name="LogPanel" Visibility="Collapsed" Margin="18,0,18,16">
+            <TextBox x:Name="LogBox" IsReadOnly="True" Height="140" VerticalScrollBarVisibility="Auto"
+                     FontFamily="Consolas" FontSize="11" TextWrapping="Wrap" Background="#1E1E1E" Foreground="#DCDCDC"/>
+        </Border>
+    </StackPanel>
 </Window>
 '@
 
 $reader = New-Object System.Xml.XmlNodeReader $xaml
 $window = [Windows.Markup.XamlReader]::Load($reader)
 
-$StatusIcon = $window.FindName("StatusIcon")
-$StatusText = $window.FindName("StatusText")
-$TamperText = $window.FindName("TamperText")
-$DisableBtn = $window.FindName("DisableBtn")
-$EnableBtn  = $window.FindName("EnableBtn")
-$LogBox     = $window.FindName("LogBox")
+$BannerBorder    = $window.FindName("BannerBorder")
+$BannerText      = $window.FindName("BannerText")
+$BadgeBorder     = $window.FindName("BadgeBorder")
+$BadgeText       = $window.FindName("BadgeText")
+$TamperText      = $window.FindName("TamperText")
+$DisableBtn      = $window.FindName("DisableBtn")
+$EnableBtn       = $window.FindName("EnableBtn")
+$OpenSecurityBtn = $window.FindName("OpenSecurityBtn")
+$LogToggleBtn    = $window.FindName("LogToggleBtn")
+$LogPanel        = $window.FindName("LogPanel")
+$LogBox          = $window.FindName("LogBox")
 
 function Write-Log {
     param([string]$Message, [string]$Level = "INFO")
@@ -81,18 +105,21 @@ function Update-Status {
     try {
         $mp = Get-MpComputerStatus -ErrorAction Stop
         if ($mp.RealTimeProtectionEnabled) {
-            $StatusIcon.Text = "🛡️"
-            $StatusText.Text = "Koruma AÇIK"
-            $StatusText.Foreground = "DarkGreen"
+            $BannerBorder.Background = "#27AE60"
+            $BannerText.Text = "Windows Defender Açık"
+            $BadgeBorder.Background = "#27AE60"
+            $BadgeText.Text = "OK"
         } else {
-            $StatusIcon.Text = "⚠️"
-            $StatusText.Text = "Koruma KAPALI"
-            $StatusText.Foreground = "DarkRed"
+            $BannerBorder.Background = "#C0392B"
+            $BannerText.Text = "Windows Defender Kapalı"
+            $BadgeBorder.Background = "#C0392B"
+            $BadgeText.Text = "X"
         }
     } catch {
-        $StatusIcon.Text = "❔"
-        $StatusText.Text = "Durum okunamadı"
-        $StatusText.Foreground = "Gray"
+        $BannerBorder.Background = "#7F8C8D"
+        $BannerText.Text = "Durum okunamadı"
+        $BadgeBorder.Background = "#7F8C8D"
+        $BadgeText.Text = "?"
     }
 
     $tamper = Get-TamperProtectionState
@@ -216,6 +243,16 @@ function Enable-Defender {
 
 $DisableBtn.Add_Click({ Disable-Defender })
 $EnableBtn.Add_Click({ Enable-Defender })
+$OpenSecurityBtn.Add_Click({ Start-Process "windowsdefender://" })
+$LogToggleBtn.Add_Click({
+    if ($LogPanel.Visibility -eq [System.Windows.Visibility]::Visible) {
+        $LogPanel.Visibility = [System.Windows.Visibility]::Collapsed
+        $LogToggleBtn.Content = "Log Göster"
+    } else {
+        $LogPanel.Visibility = [System.Windows.Visibility]::Visible
+        $LogToggleBtn.Content = "Log Gizle"
+    }
+})
 
 Update-Status
 Write-Log "Araç başlatıldı. Tamper Protection açıksa bazı adımlar başarısız görünecektir - bu beklenen bir davranıştır."
