@@ -221,7 +221,11 @@ function Disable-Defender {
 
     Write-Log "Kapatma işlemi tamamlandı. Yukarıdaki HATA satırları Tamper Protection'ın engellediği adımlardır."
     Write-Log "Servis değişikliği ancak yeniden başlatma sonrası etkili olur. Bilgisayarı yeniden başlatın, ardından Windows Security'nin 'kuruluşunuz tarafından yönetilir' haline geçtiğini kontrol edin." "WARN"
-    Update-Status
+
+    for ($i = 0; $i -lt 3; $i++) {
+        Start-Sleep -Milliseconds 800
+        Update-Status
+    }
 }
 
 function Enable-Defender {
@@ -256,7 +260,14 @@ function Enable-Defender {
     Set-DefenderPreferenceSafe "WdNisSvc servisi başlatılıyor" { Start-Service -Name WdNisSvc -ErrorAction Stop }
 
     Write-Log "Açma işlemi tamamlandı. Değişikliklerin tam yansıması için bilgisayarı yeniden başlatmanız gerekebilir."
-    Update-Status
+
+    # WinDefend yeni başladığında MsMpEng motoru birkaç saniye içinde ayağa kalkıyor;
+    # hemen sorgulanırsa eski/boş durum dönebiliyor. Kısa aralıklarla birkaç kez
+    # tekrar sorgulayıp arayüzü güncel tutuyoruz.
+    for ($i = 0; $i -lt 5; $i++) {
+        Start-Sleep -Milliseconds 800
+        Update-Status
+    }
 }
 
 $DisableBtn.Add_Click({ Disable-Defender })
