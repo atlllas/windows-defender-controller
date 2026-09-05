@@ -863,4 +863,8 @@ $MenuBtn.Add_Click({ $AppMenu.IsOpen = $true })
 Set-Language $script:CurrentLang
 Write-Log (T "Log_AppStarted")
 
+# Pencere görünür hale geldikten hemen sonra Tamper Protection açıksa uyarıyı
+# göster - butona basmayı beklemeden kullanıcı ne yapması gerektiğini bilsin.
+$window.Add_Loaded({ Show-TamperWarning })
+
 $window.ShowDialog() | Out-Null
