@@ -24,8 +24,14 @@ Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
         WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize"
         FontFamily="Segoe UI" Background="#F4F4F4">
     <StackPanel>
-        <Border x:Name="BannerBorder" Background="#C0392B" Padding="18,16">
-            <TextBlock x:Name="BannerText" Text="Durum kontrol ediliyor..." Foreground="White" FontSize="17" FontWeight="Bold"/>
+        <Border x:Name="BannerBorder" Background="#C0392B" Padding="18,16,8,16">
+            <Grid>
+                <TextBlock x:Name="BannerText" Text="Durum kontrol ediliyor..." Foreground="White" FontSize="17" FontWeight="Bold"
+                           VerticalAlignment="Center" Margin="0,0,34,0"/>
+                <Button x:Name="MenuBtn" Content="&#8942;" FontSize="20" FontWeight="Bold" Foreground="White"
+                        Background="Transparent" BorderThickness="0" Width="34" Height="34" Padding="0"
+                        HorizontalAlignment="Right" VerticalAlignment="Center" Cursor="Hand"/>
+            </Grid>
         </Border>
 
         <Grid Margin="18,16,18,4">
@@ -77,6 +83,7 @@ $window = [Windows.Markup.XamlReader]::Load($reader)
 
 $BannerBorder    = $window.FindName("BannerBorder")
 $BannerText      = $window.FindName("BannerText")
+$MenuBtn         = $window.FindName("MenuBtn")
 $ShieldPath      = $window.FindName("ShieldPath")
 $ShieldGlyph     = $window.FindName("ShieldGlyph")
 $TamperText      = $window.FindName("TamperText")
@@ -285,6 +292,31 @@ $LogToggleBtn.Add_Click({
         $LogToggleBtn.Content = "Log Gizle"
     }
 })
+
+# ---- Üst şeritteki "⋮" menüsü ----
+$AppMenu = New-Object System.Windows.Controls.ContextMenu
+$AppMenu.PlacementTarget = $MenuBtn
+$AppMenu.Placement = [System.Windows.Controls.Primitives.PlacementMode]::Bottom
+
+function New-AppMenuItem {
+    param([string]$Header, [scriptblock]$OnClick)
+    $item = New-Object System.Windows.Controls.MenuItem
+    $item.Header = $Header
+    $item.Add_Click($OnClick)
+    return $item
+}
+
+$AppMenu.Items.Add((New-AppMenuItem "Defender Ayarlarını Aç" { Start-Process "windowsdefender://threatsettings" })) | Out-Null
+$AppMenu.Items.Add((New-AppMenuItem "Durumu Yenile" { Update-Status; Write-Log "Durum manuel olarak yenilendi." })) | Out-Null
+$AppMenu.Items.Add((New-Object System.Windows.Controls.Separator)) | Out-Null
+$AppMenu.Items.Add((New-AppMenuItem "GitHub Reposunu Aç" { Start-Process "https://github.com/atlllas/windows-defender-controller" })) | Out-Null
+$AppMenu.Items.Add((New-AppMenuItem "Hakkında" {
+    [System.Windows.MessageBox]::Show(
+        "Defender Controller`n`nKişisel kullanım için Windows Defender aç/kapa aracı.",
+        "Hakkında", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Information) | Out-Null
+})) | Out-Null
+
+$MenuBtn.Add_Click({ $AppMenu.IsOpen = $true })
 
 Update-Status
 Write-Log "Araç başlatıldı. Tamper Protection açıksa bazı adımlar başarısız görünecektir - bu beklenen bir davranıştır."
