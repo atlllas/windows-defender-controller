@@ -79,67 +79,69 @@ function Get-Strings {
             About_Github = "GitHub Repo"
             About_Issue = "Report an Issue"
             About_Author = "Author"
+            About_Website = "Website"
             About_OK = "OK"
         }
         tr = @{
             Banner_Checking = "Durum kontrol ediliyor..."
-            Banner_On = "Windows Defender Acik"
-            Banner_Off = "Windows Defender Kapali"
-            Banner_Unknown = "Durum okunamadi"
-            Tamper_On = "Tamper Protection acik - bazi degisiklikler geri alinabilir"
-            Tamper_Unknown = "Tamper Protection durumu okunamadi"
-            Btn_Disable = "Windows Defender'i Devre Disi Birak"
-            Btn_Enable = "Windows Defender'i Etkinlestir"
-            Btn_OpenSecurity = "Guvenlik Merkezini Ac"
-            Btn_LogShow = "Log Goster"
+            Banner_On = "Windows Defender Açık"
+            Banner_Off = "Windows Defender Kapalı"
+            Banner_Unknown = "Durum okunamadı"
+            Tamper_On = "Tamper Protection açık - bazı değişiklikler geri alınabilir"
+            Tamper_Unknown = "Tamper Protection durumu okunamadı"
+            Btn_Disable = "Windows Defender'ı Devre Dışı Bırak"
+            Btn_Enable = "Windows Defender'ı Etkinleştir"
+            Btn_OpenSecurity = "Güvenlik Merkezini Aç"
+            Btn_LogShow = "Log Göster"
             Btn_LogHide = "Log Gizle"
-            Btn_Menu = "Menu"
-            Menu_DefenderSettings = "Defender Ayarlarini Ac"
+            Btn_Menu = "Menü"
+            Menu_DefenderSettings = "Defender Ayarlarını Aç"
             Menu_Refresh = "Durumu Yenile"
-            Menu_Github = "GitHub Reposunu Ac"
+            Menu_Github = "GitHub Reposunu Aç"
             Menu_Language = "Dil"
-            Menu_About = "Hakkinda"
-            Log_AppStarted = "Arac baslatildi. Tamper Protection aciksa bazi adimlar basarisiz gorunecektir - bu beklenen bir davranistir."
-            Log_DisableStart = "Defender kapatma islemi basliyor..."
-            Log_EnableStart = "Defender acma islemi basliyor..."
+            Menu_About = "Hakkında"
+            Log_AppStarted = "Araç başlatıldı. Tamper Protection açıksa bazı adımlar başarısız görünecektir - bu beklenen bir davranıştır."
+            Log_DisableStart = "Defender kapatma işlemi başlıyor..."
+            Log_EnableStart = "Defender açma işlemi başlıyor..."
             Log_RefreshManual = "Durum manuel olarak yenilendi."
             Log_OK = "OK"
             Log_FAILED = "HATA"
-            Log_DisableDone = "Kapatma islemi tamamlandi. Yukaridaki HATA satirlari Tamper Protection'in engelledigi adimlardir."
-            Log_DisableRebootNote = "Servis degisikligi ancak yeniden baslatma sonrasi etkili olur. Bilgisayari yeniden baslatin, ardindan Windows Security'nin 'kurulusunuz tarafindan yonetilir' haline gectigini kontrol edin."
-            Log_EnableDone = "Acma islemi tamamlandi. Degisikliklerin tam yansimasi icin bilgisayari yeniden baslatmaniz gerekebilir."
-            Step_RealtimeOff = "Gercek zamanli koruma kapatiliyor"
-            Step_BehaviorOff = "Davranis izleme kapatiliyor"
-            Step_IOAVOff = "IOAV (indirilen dosya) korumasi kapatiliyor"
-            Step_ScriptOff = "Script taramasi kapatiliyor"
-            Step_CloudOff = "Bulut tabanli koruma kapatiliyor"
-            Step_SamplesOff = "Ornek gonderimi kapatiliyor"
-            Step_TaskOff = "Zamanlanmis tarama gorevi devre disi birakiliyor"
-            Step_PolicySet = "Policy registry anahtari (DisableAntiSpyware) ayarlaniyor"
-            Step_WinDefendDisable = "WinDefend baslangic tipi devre disi yapiliyor (etkisi yeniden baslatmada)"
-            Step_WdNisDisable = "WdNisSvc baslangic tipi devre disi yapiliyor (etkisi yeniden baslatmada)"
-            Step_RealtimeOn = "Gercek zamanli koruma aciliyor"
-            Step_BehaviorOn = "Davranis izleme aciliyor"
-            Step_IOAVOn = "IOAV (indirilen dosya) korumasi aciliyor"
-            Step_ScriptOn = "Script taramasi aciliyor"
-            Step_CloudOn = "Bulut tabanli koruma aciliyor"
-            Step_SamplesOn = "Ornek gonderimi varsayilana aliniyor"
-            Step_TaskOn = "Zamanlanmis tarama gorevi yeniden etkinlestiriliyor"
-            Step_PolicyRemoved = "Policy registry anahtari (DisableAntiSpyware) kaldiriliyor"
-            Step_WinDefendManual = "WinDefend baslangic tipi normale (Manual) aliniyor"
-            Step_WdNisManual = "WdNisSvc baslangic tipi normale (Manual) aliniyor"
-            Step_WinDefendStart = "WinDefend servisi baslatiliyor"
-            Step_WdNisStart = "WdNisSvc servisi baslatiliyor"
-            Tamper_Title = "Tamper Protection Acik"
-            Tamper_Body = "Kurcalamaya Karsi Koruma (Tamper Protection) ACIK.`n`nBu acikken Defender ayarlari script ile kalici olarak degistirilemez - Windows onlari otomatik geri alir. Bu, Microsoft'un bilincli bir guvenlik tasarimidir ve script ile kapatilamaz, sadece elle kapatilabilir.`n`nAdimlar:`n1. Windows Security > Virus ve tehdit korumasi > Ayarlari yonet`n2. 'Kurcalamaya Karsi Koruma' anahtarini kapatin`n`nSimdi bu ekrani acmami ister misiniz?"
-            Tamper_Opened = "Windows Security ayar ekrani acildi. Tamper Protection'i kapattiktan sonra 'Devre Disi Birak' butonuna tekrar basin."
-            Tamper_StayedOn = "Tamper Protection acik kaldi - asagidaki adimlardan bazilari basarisiz olacaktir."
-            About_Title = "Hakkinda"
-            About_Subtitle = "Yonetici haklariyla Windows Defender'i acip kapatmak icin kisisel bir arac."
-            About_Tagline = "Kisisel proje - birlikte gelistirildi"
+            Log_DisableDone = "Kapatma işlemi tamamlandı. Yukarıdaki HATA satırları Tamper Protection'ın engellediği adımlardır."
+            Log_DisableRebootNote = "Servis değişikliği ancak yeniden başlatma sonrası etkili olur. Bilgisayarı yeniden başlatın, ardından Windows Security'nin 'kuruluşunuz tarafından yönetilir' haline geçtiğini kontrol edin."
+            Log_EnableDone = "Açma işlemi tamamlandı. Değişikliklerin tam yansıması için bilgisayarı yeniden başlatmanız gerekebilir."
+            Step_RealtimeOff = "Gerçek zamanlı koruma kapatılıyor"
+            Step_BehaviorOff = "Davranış izleme kapatılıyor"
+            Step_IOAVOff = "IOAV (indirilen dosya) koruması kapatılıyor"
+            Step_ScriptOff = "Script taraması kapatılıyor"
+            Step_CloudOff = "Bulut tabanlı koruma kapatılıyor"
+            Step_SamplesOff = "Örnek gönderimi kapatılıyor"
+            Step_TaskOff = "Zamanlanmış tarama görevi devre dışı bırakılıyor"
+            Step_PolicySet = "Policy registry anahtarı (DisableAntiSpyware) ayarlanıyor"
+            Step_WinDefendDisable = "WinDefend başlangıç tipi devre dışı yapılıyor (etkisi yeniden başlatmada)"
+            Step_WdNisDisable = "WdNisSvc başlangıç tipi devre dışı yapılıyor (etkisi yeniden başlatmada)"
+            Step_RealtimeOn = "Gerçek zamanlı koruma açılıyor"
+            Step_BehaviorOn = "Davranış izleme açılıyor"
+            Step_IOAVOn = "IOAV (indirilen dosya) koruması açılıyor"
+            Step_ScriptOn = "Script taraması açılıyor"
+            Step_CloudOn = "Bulut tabanlı koruma açılıyor"
+            Step_SamplesOn = "Örnek gönderimi varsayılana alınıyor"
+            Step_TaskOn = "Zamanlanmış tarama görevi yeniden etkinleştiriliyor"
+            Step_PolicyRemoved = "Policy registry anahtarı (DisableAntiSpyware) kaldırılıyor"
+            Step_WinDefendManual = "WinDefend başlangıç tipi normale (Manual) alınıyor"
+            Step_WdNisManual = "WdNisSvc başlangıç tipi normale (Manual) alınıyor"
+            Step_WinDefendStart = "WinDefend servisi başlatılıyor"
+            Step_WdNisStart = "WdNisSvc servisi başlatılıyor"
+            Tamper_Title = "Tamper Protection Açık"
+            Tamper_Body = "Kurcalamaya Karşı Koruma (Tamper Protection) AÇIK.`n`nBu açıkken Defender ayarları script ile kalıcı olarak değiştirilemez - Windows onları otomatik geri alır. Bu, Microsoft'un bilinçli bir güvenlik tasarımıdır ve script ile kapatılamaz, sadece elle kapatılabilir.`n`nAdımlar:`n1. Windows Security > Virüs ve tehdit koruması > Ayarları yönet`n2. 'Kurcalamaya Karşı Koruma' anahtarını kapatın`n`nŞimdi bu ekranı açmamı ister misiniz?"
+            Tamper_Opened = "Windows Security ayar ekranı açıldı. Tamper Protection'ı kapattıktan sonra 'Devre Dışı Bırak' butonuna tekrar basın."
+            Tamper_StayedOn = "Tamper Protection açık kaldı - aşağıdaki adımlardan bazıları başarısız olacaktır."
+            About_Title = "Hakkında"
+            About_Subtitle = "Yönetici haklarıyla Windows Defender'ı açıp kapatmak için kişisel bir araç."
+            About_Tagline = "Kişisel proje - birlikte geliştirildi"
             About_Github = "GitHub Reposu"
             About_Issue = "Sorun Bildir"
             About_Author = "Yazar"
+            About_Website = "Web Sitesi"
             About_OK = "Tamam"
         }
         de = @{
@@ -201,6 +203,7 @@ function Get-Strings {
             About_Github = "GitHub-Repo"
             About_Issue = "Problem melden"
             About_Author = "Autor"
+            About_Website = "Webseite"
             About_OK = "OK"
         }
         es = @{
@@ -262,6 +265,7 @@ function Get-Strings {
             About_Github = "Repositorio de GitHub"
             About_Issue = "Reportar un problema"
             About_Author = "Autor"
+            About_Website = "Sitio web"
             About_OK = "Aceptar"
         }
         fr = @{
@@ -323,6 +327,7 @@ function Get-Strings {
             About_Github = "Depot GitHub"
             About_Issue = "Signaler un probleme"
             About_Author = "Auteur"
+            About_Website = "Site web"
             About_OK = "OK"
         }
         ru = @{
@@ -384,6 +389,7 @@ function Get-Strings {
             About_Github = "Репозиторий GitHub"
             About_Issue = "Сообщить о проблеме"
             About_Author = "Автор"
+            About_Website = "Сайт"
             About_OK = "ОК"
         }
     }
@@ -715,6 +721,7 @@ function Show-AboutDialog {
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="26"/>
@@ -735,6 +742,11 @@ function Show-AboutDialog {
                 <TextBlock Grid.Row="2" Grid.Column="0" Text="👤" FontSize="14" Margin="0,8,0,0"/>
                 <TextBlock x:Name="LblAuthor" Grid.Row="2" Grid.Column="1" Text="Author" FontSize="12" Margin="0,8,0,0"/>
                 <TextBlock Grid.Row="2" Grid.Column="2" Text="atlllas" FontSize="12" Margin="0,8,0,0"/>
+
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="🌐" FontSize="14" Margin="0,8,0,0"/>
+                <TextBlock x:Name="LblWebsite" Grid.Row="3" Grid.Column="1" Text="Website" FontSize="12" Margin="0,8,0,0"/>
+                <TextBlock x:Name="LinkWebsite" Grid.Row="3" Grid.Column="2" Text="imatlas.dev"
+                           FontSize="12" Foreground="#2E86DE" TextDecorations="Underline" Cursor="Hand" Margin="0,8,0,0"/>
             </Grid>
         </Border>
 
@@ -752,13 +764,16 @@ function Show-AboutDialog {
     $aboutWindow.FindName("LblGithub").Text = T "About_Github"
     $aboutWindow.FindName("LblIssue").Text = T "About_Issue"
     $aboutWindow.FindName("LblAuthor").Text = T "About_Author"
+    $aboutWindow.FindName("LblWebsite").Text = T "About_Website"
 
     $okBtn = $aboutWindow.FindName("AboutOkBtn")
     $okBtn.Content = T "About_OK"
 
     $linkGithub = $aboutWindow.FindName("LinkGithub")
     $linkIssue = $aboutWindow.FindName("LinkIssue")
+    $linkWebsite = $aboutWindow.FindName("LinkWebsite")
     $linkGithub.Add_MouseLeftButtonUp({ Start-Process "https://github.com/atlllas/windows-defender-controller" })
+    $linkWebsite.Add_MouseLeftButtonUp({ Start-Process "https://imatlas.dev" })
     $linkIssue.Add_MouseLeftButtonUp({ Start-Process "https://github.com/atlllas/windows-defender-controller/issues" })
     $okBtn.Add_Click({ $aboutWindow.Close() }.GetNewClosure())
 
@@ -800,10 +815,10 @@ $script:MiAbout    = New-AppMenuItem (T "Menu_About") { Show-AboutDialog }
 $script:LangMenuItems = @{}
 $languageOrder = @(
     @{ Code = "en"; Name = "English" },
-    @{ Code = "tr"; Name = "Turkce" },
+    @{ Code = "tr"; Name = "Türkçe" },
     @{ Code = "de"; Name = "Deutsch" },
-    @{ Code = "es"; Name = "Espanol" },
-    @{ Code = "fr"; Name = "Francais" },
+    @{ Code = "es"; Name = "Español" },
+    @{ Code = "fr"; Name = "Français" },
     @{ Code = "ru"; Name = "Русский" }
 )
 foreach ($lang in $languageOrder) {
