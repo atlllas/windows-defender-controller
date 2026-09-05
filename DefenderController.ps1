@@ -15,7 +15,18 @@ if (-not $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Adm
     exit
 }
 
-Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
+Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, System.Drawing
+
+function Get-AppIconSource {
+    try {
+        $sysIcon = [System.Drawing.Icon]::ExtractAssociatedIcon("$env:SystemRoot\System32\SecurityHealthSystray.exe")
+        return [System.Windows.Interop.Imaging]::CreateBitmapSourceFromHIcon(
+            $sysIcon.Handle, [System.Windows.Int32Rect]::Empty,
+            [System.Windows.Media.Imaging.BitmapSizeOptions]::FromEmptyOptions())
+    } catch {
+        return $null
+    }
+}
 
 # ---- Diller ----
 function Get-Strings {
@@ -474,6 +485,8 @@ function T {
 
 $reader = New-Object System.Xml.XmlNodeReader $xaml
 $window = [Windows.Markup.XamlReader]::Load($reader)
+$script:AppIconSource = Get-AppIconSource
+if ($script:AppIconSource) { $window.Icon = $script:AppIconSource }
 
 $BannerBorder    = $window.FindName("BannerBorder")
 $BannerText      = $window.FindName("BannerText")
@@ -757,6 +770,7 @@ function Show-AboutDialog {
     $aboutReader = New-Object System.Xml.XmlNodeReader $aboutXaml
     $aboutWindow = [Windows.Markup.XamlReader]::Load($aboutReader)
     $aboutWindow.Owner = $window
+    if ($script:AppIconSource) { $aboutWindow.Icon = $script:AppIconSource }
     $aboutWindow.Title = T "About_Title"
 
     $aboutWindow.FindName("AboutSubtitle").Text = T "About_Subtitle"
