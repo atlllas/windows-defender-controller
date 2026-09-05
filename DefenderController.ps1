@@ -44,6 +44,8 @@ function Get-Strings {
             Tamper_Unknown = "Could not read Tamper Protection status"
             Btn_Disable = "Disable Windows Defender"
             Btn_Enable = "Enable Windows Defender"
+            Confirm_DisableTitle = "Disable Windows Defender?"
+            Confirm_DisableBody = "This will turn off Windows Defender's protection on this computer. Continue?"
             Btn_OpenSecurity = "Open Security Center"
             Btn_LogShow = "Show Log"
             Btn_LogHide = "Hide Log"
@@ -106,6 +108,8 @@ function Get-Strings {
             Tamper_Unknown = "Tamper Protection durumu okunamadı"
             Btn_Disable = "Windows Defender'ı Devre Dışı Bırak"
             Btn_Enable = "Windows Defender'ı Etkinleştir"
+            Confirm_DisableTitle = "Windows Defender Devre Dışı Bırakılsın mı?"
+            Confirm_DisableBody = "Bu işlem bilgisayarınızdaki Windows Defender korumasını kapatacak. Devam edilsin mi?"
             Btn_OpenSecurity = "Güvenlik Merkezini Aç"
             Btn_LogShow = "Log Göster"
             Btn_LogHide = "Log Gizle"
@@ -168,6 +172,8 @@ function Get-Strings {
             Tamper_Unknown = "Status des Manipulationsschutzes konnte nicht gelesen werden"
             Btn_Disable = "Windows Defender deaktivieren"
             Btn_Enable = "Windows Defender aktivieren"
+            Confirm_DisableTitle = "Windows Defender deaktivieren?"
+            Confirm_DisableBody = "Dadurch wird der Schutz von Windows Defender auf diesem Computer ausgeschaltet. Fortfahren?"
             Btn_OpenSecurity = "Sicherheitscenter offnen"
             Btn_LogShow = "Protokoll anzeigen"
             Btn_LogHide = "Protokoll ausblenden"
@@ -230,6 +236,8 @@ function Get-Strings {
             Tamper_Unknown = "No se pudo leer el estado de la proteccion contra alteraciones"
             Btn_Disable = "Desactivar Windows Defender"
             Btn_Enable = "Activar Windows Defender"
+            Confirm_DisableTitle = "¿Desactivar Windows Defender?"
+            Confirm_DisableBody = "Esto desactivará la protección de Windows Defender en este equipo. ¿Continuar?"
             Btn_OpenSecurity = "Abrir el Centro de seguridad"
             Btn_LogShow = "Mostrar registro"
             Btn_LogHide = "Ocultar registro"
@@ -292,6 +300,8 @@ function Get-Strings {
             Tamper_Unknown = "Impossible de lire l'etat de la protection contre les modifications"
             Btn_Disable = "Desactiver Windows Defender"
             Btn_Enable = "Activer Windows Defender"
+            Confirm_DisableTitle = "Désactiver Windows Defender ?"
+            Confirm_DisableBody = "Cela désactivera la protection de Windows Defender sur cet ordinateur. Continuer ?"
             Btn_OpenSecurity = "Ouvrir le Centre de securite"
             Btn_LogShow = "Afficher le journal"
             Btn_LogHide = "Masquer le journal"
@@ -354,6 +364,8 @@ function Get-Strings {
             Tamper_Unknown = "Не удалось получить состояние защиты от изменений"
             Btn_Disable = "Отключить Windows Defender"
             Btn_Enable = "Включить Windows Defender"
+            Confirm_DisableTitle = "Отключить Windows Defender?"
+            Confirm_DisableBody = "Это отключит защиту Windows Defender на этом компьютере. Продолжить?"
             Btn_OpenSecurity = "Открыть Центр безопасности"
             Btn_LogShow = "Показать журнал"
             Btn_LogHide = "Скрыть журнал"
@@ -798,7 +810,15 @@ function Show-AboutDialog {
     $aboutWindow.ShowDialog() | Out-Null
 }
 
-$DisableBtn.Add_Click({ Disable-Defender })
+$DisableBtn.Add_Click({
+    $confirm = [System.Windows.MessageBox]::Show(
+        (T "Confirm_DisableBody"),
+        (T "Confirm_DisableTitle"),
+        [System.Windows.MessageBoxButton]::YesNo,
+        [System.Windows.MessageBoxImage]::Warning
+    )
+    if ($confirm -eq [System.Windows.MessageBoxResult]::Yes) { Disable-Defender }
+})
 $EnableBtn.Add_Click({ Enable-Defender })
 $OpenSecurityBtn.Add_Click({ Start-Process "windowsdefender://" })
 $LogToggleBtn.Add_Click({
